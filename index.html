@@ -29,29 +29,8 @@
   </header>
 
   <main>
-    <!-- ROLE PICKER -->
-    <section class="screen" id="scrRole">
-      <div class="wrap narrow">
-        <h1 class="page-h">Who's using the app?</h1>
-        <p class="muted">Pick once — this phone remembers.</p>
-        <div class="role-grid">
-          <button class="role-tile" data-role="tech">
-            <span class="role-icon">🔧</span>
-            <b>Shop / Tech</b>
-            <span>My assigned repairs, repair timer, parts &amp; labor</span>
-          </button>
-          <button class="role-tile" data-role="mgr">
-            <span class="role-icon">📋</span>
-            <b>Manager</b>
-            <span>Inspections, work orders, shop reports, trailer map</span>
-          </button>
-        </div>
-        <div class="wx-line" id="wxLine"></div>
-      </div>
-    </section>
-
     <!-- TECH: PICK NAME -->
-    <section class="screen" id="scrTechLogin" hidden>
+    <section class="screen" id="scrTechLogin">
       <div class="wrap narrow">
         <div class="card">
           <div class="card-h">Tech Portal</div>
@@ -62,7 +41,8 @@
             <button class="btn red block" id="techGo" disabled>View my jobs →</button>
           </div>
         </div>
-        <button class="link-back" data-goto="role">← Change role</button>
+        <div class="wx-line" id="wxLine"></div>
+        <p class="muted" style="margin-top:18px;font-size:13px">Managers: inspections, work orders and shop reports are in the Transportation Manager app.</p>
       </div>
     </section>
 
@@ -87,158 +67,7 @@
       <div class="wrap" id="repairBody"></div>
     </section>
 
-    <!-- MANAGER: PIN -->
-    <section class="screen" id="scrPin" hidden>
-      <div class="wrap narrow">
-        <div class="card">
-          <div class="card-h">Manager Dashboard</div>
-          <div class="card-b center">
-            <p class="muted">Enter the dashboard PIN</p>
-            <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i></div>
-            <div class="keypad" id="keypad">
-              <button>1</button><button>2</button><button>3</button>
-              <button>4</button><button>5</button><button>6</button>
-              <button>7</button><button>8</button><button>9</button>
-              <button data-k="clr">CLR</button><button>0</button><button data-k="back">⌫</button>
-            </div>
-            <div class="pin-err" id="pinErr"></div>
-          </div>
-        </div>
-        <button class="link-back" data-goto="role">← Change role</button>
-      </div>
-    </section>
-
-    <!-- MANAGER: DASHBOARD -->
-    <section class="screen" id="scrMgr" hidden>
-      <div class="tabs scroll" id="mgrTabs">
-        <button class="tab active" data-mtab="insp">Inspections</button>
-        <button class="tab" data-mtab="an">Shop Analytics</button>
-        <button class="tab" data-mtab="dl">Driver &amp; Location</button>
-        <button class="tab" data-mtab="hist">Trailer History</button>
-        <button class="tab" data-mtab="map">Trailer Map</button>
-      </div>
-
-      <!-- Inspections -->
-      <div class="wrap wide mview" id="mvInsp">
-        <div class="kpis">
-          <div class="kpi"><b id="kTotal">--</b><span>Total inspections</span></div>
-          <div class="kpi red"><b id="kDefects">--</b><span>With defects</span></div>
-          <div class="kpi amber"><b id="kPending">--</b><span>Pending review</span></div>
-          <div class="kpi green"><b id="kWeek">--</b><span>This week</span></div>
-        </div>
-        <div class="filters">
-          <div class="f"><label class="lbl">Search</label><input id="fSearch" placeholder="Driver, trailer, location, defect…"></div>
-          <div class="f"><label class="lbl">Status</label><select id="fStatus"><option value="">All statuses</option></select></div>
-          <div class="f"><label class="lbl">Defects</label><select id="fDefects"><option value="">All</option><option value="yes">Has defects</option><option value="no">Clear</option></select></div>
-          <div class="f"><label class="lbl">From</label><input type="date" id="fFrom"></div>
-          <div class="f"><label class="lbl">To</label><input type="date" id="fTo"></div>
-          <div class="f f-btns"><button class="btn outline sm" id="fClear">Clear</button><button class="btn dark sm" id="fCsv">Export CSV</button></div>
-        </div>
-        <div class="panel">
-          <div class="panel-h"><span>Inspection records</span><span class="muted-l" id="rowCount">--</span></div>
-          <div class="table-wrap">
-            <table class="tbl" id="inspTable">
-              <thead><tr>
-                <th data-sort="date">Date</th><th data-sort="driver">Driver</th><th data-sort="trailer">Trailer</th>
-                <th>Location</th><th>Defects</th><th data-sort="status">Status</th><th>Assigned tech</th><th>GPS</th><th>WO #</th>
-              </tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Shop analytics -->
-      <div class="wrap wide mview" id="mvAn" hidden>
-        <div class="filters">
-          <div class="f"><label class="lbl">From</label><input type="date" id="anFrom"></div>
-          <div class="f"><label class="lbl">To</label><input type="date" id="anTo"></div>
-          <div class="f"><label class="lbl">Tech</label><select id="anTech"><option value="">All techs</option></select></div>
-          <div class="f f-btns"><button class="btn red sm" id="anRun">Run report</button><button class="btn dark sm" id="anCsv">Export CSV</button></div>
-        </div>
-        <div class="kpis six">
-          <div class="kpi"><b id="anTotal">--</b><span>Total jobs</span></div>
-          <div class="kpi green"><b id="anDone">--</b><span>Completed</span></div>
-          <div class="kpi amber"><b id="anIp">--</b><span>In progress</span></div>
-          <div class="kpi"><b id="anHours">--</b><span>Total labor hours</span></div>
-          <div class="kpi"><b id="anAvg">--</b><span>Avg time per job</span></div>
-          <div class="kpi red"><b id="anOpen">--</b><span>Open / pending</span></div>
-        </div>
-        <div class="panel">
-          <div class="panel-h"><span>Labor hours by tech</span></div>
-          <div class="table-wrap"><table class="tbl"><thead><tr><th>Tech</th><th>Jobs</th><th>Completed</th><th>Total hours</th><th>Avg per job</th><th class="w-bar">Workload</th></tr></thead><tbody id="anTechBody"><tr><td colspan="6" class="empty-cell">Run a report to load data.</td></tr></tbody></table></div>
-        </div>
-        <div class="panel">
-          <div class="panel-h"><span>Repair sessions</span><span class="muted-l" id="anCount"></span></div>
-          <div class="table-wrap"><table class="tbl"><thead><tr><th>WO #</th><th>Tech</th><th>Trailer</th><th>Location</th><th>Started</th><th>Ended</th><th>Time</th><th>Parts</th><th>Status</th><th>Start GPS</th><th>End GPS</th></tr></thead><tbody id="anSessBody"><tr><td colspan="11" class="empty-cell">Run a report to load data.</td></tr></tbody></table></div>
-        </div>
-      </div>
-
-      <!-- Driver & location -->
-      <div class="wrap wide mview" id="mvDl" hidden>
-        <div class="filters">
-          <div class="f"><label class="lbl">From</label><input type="date" id="dlFrom"></div>
-          <div class="f"><label class="lbl">To</label><input type="date" id="dlTo"></div>
-          <div class="f"><label class="lbl">Quick range</label><select id="dlQuick"><option value="10">Last 10 days</option><option value="30" selected>Last 30 days</option><option value="60">Last 60 days</option><option value="90">Last 90 days</option><option value="0">All time</option></select></div>
-          <div class="f f-btns"><button class="btn red sm" id="dlRun">Run report</button><button class="btn dark sm" id="dlCsv">Export CSV</button></div>
-        </div>
-        <div class="kpis">
-          <div class="kpi"><b id="dlTotal">--</b><span>Inspections in range</span></div>
-          <div class="kpi green"><b id="dlActive">--</b><span>Active drivers</span></div>
-          <div class="kpi red"><b id="dlInactive">--</b><span>Inactive (&gt;10 days)</span></div>
-          <div class="kpi amber"><b id="dlHot" class="kpi-text">--</b><span>Top defect location</span></div>
-        </div>
-        <div class="panel">
-          <div class="panel-h"><span>Driver inspection activity</span><span class="muted-l">Sorted by last submission</span></div>
-          <div class="table-wrap"><table class="tbl"><thead><tr><th>Driver</th><th>Inspections</th><th>Last submission</th><th>Days since</th><th>Avg days between</th><th>Defects</th><th>Defect rate</th><th class="w-bar">Activity</th><th>Status</th></tr></thead><tbody id="dlDriverBody"><tr><td colspan="9" class="empty-cell">Run a report to load driver data.</td></tr></tbody></table></div>
-        </div>
-        <div class="panel">
-          <div class="panel-h"><span>Location defect hotspots</span><span class="muted-l">Ranked by defect count</span></div>
-          <div class="table-wrap"><table class="tbl"><thead><tr><th>Rank</th><th>Location</th><th>Inspections</th><th>With defects</th><th>Defect items</th><th>Defect rate</th><th>Top defect</th><th class="w-bar">Volume</th></tr></thead><tbody id="dlLocBody"><tr><td colspan="8" class="empty-cell">Run a report to load location data.</td></tr></tbody></table></div>
-        </div>
-      </div>
-
-      <!-- Trailer history -->
-      <div class="wrap wide mview" id="mvHist" hidden>
-        <div class="filters">
-          <div class="f grow"><label class="lbl">Trailer number</label><input id="histInput" placeholder="e.g. T-1042"></div>
-          <div class="f f-btns"><button class="btn red sm" id="histGo">Search</button></div>
-        </div>
-        <div id="histBody"><div class="empty">Enter a trailer number to see its full inspection and repair history.</div></div>
-      </div>
-
-      <!-- Map -->
-      <div class="wrap wide mview" id="mvMap" hidden>
-        <div class="map-head">
-          <div><b>Live trailer positions</b> <span class="muted-l" id="mapCount">—</span></div>
-          <div class="map-actions">
-            <div class="seg2"><button class="on" id="mapViewMap">Map</button><button id="mapViewSum">Summary</button></div>
-            <span class="muted-l" id="mapRefreshed"></span>
-            <button class="btn red sm" id="mapRefresh">⟳ Refresh</button>
-          </div>
-        </div>
-        <div class="filters slim">
-          <div class="f grow"><input id="mapSearch" placeholder="Search trailer number or location…"></div>
-          <div class="f"><select id="mapFilter"><option value="all">All trailers</option><option value="moving">Moving</option><option value="parked">Parked</option><option value="recent">Recent (&lt;2h)</option><option value="stale">Stale (&gt;1 day)</option></select></div>
-          <div class="f f-btns"><button class="btn outline sm" id="mapClear" hidden>✕ Clear</button></div>
-        </div>
-        <div class="alert" id="mapErr" hidden></div>
-        <div id="mapBox"></div>
-        <div id="mapList"></div>
-        <div id="mapSummary" hidden></div>
-      </div>
-    </section>
   </main>
-
-  <!-- Inspection detail drawer -->
-  <div class="drawer-shade" id="drawerShade" hidden></div>
-  <aside class="drawer" id="drawer" aria-hidden="true">
-    <div class="drawer-h">
-      <div><b id="dTitle">Trailer</b><span id="dSub"></span></div>
-      <button class="tb-btn" id="dClose" aria-label="Close">✕</button>
-    </div>
-    <div class="drawer-b" id="dBody"></div>
-  </aside>
 
   <!-- Work order viewer -->
   <div class="docview" id="docView" hidden>
@@ -255,9 +84,6 @@
   <script src="config.js"></script>
   <script src="js/core.js"></script>
   <script src="js/tech.js"></script>
-  <script src="js/mgr.js"></script>
-  <script src="js/reports.js"></script>
-  <script src="js/map.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

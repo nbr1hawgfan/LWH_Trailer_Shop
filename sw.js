@@ -1,7 +1,7 @@
 // Bump VERSION when you push changes so phones pick up new files.
-const VERSION = 'ts-v1.0.0';
+const VERSION = 'ts-v1.1.0';
 const SHELL = ['./', 'index.html', 'styles.css', 'config.js', 'manifest.json',
-  'js/core.js', 'js/tech.js', 'js/mgr.js', 'js/reports.js', 'js/map.js', 'js/app.js',
+  'js/core.js', 'js/tech.js', 'js/app.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
