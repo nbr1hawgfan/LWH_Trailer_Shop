@@ -1,5 +1,5 @@
 // Bump VERSION when you push changes so phones pick up new files.
-const VERSION = 'ts-v1.1.0';
+const VERSION = 'ts-v1.1.1';
 const SHELL = ['./', 'index.html', 'styles.css', 'config.js', 'manifest.json',
   'js/core.js', 'js/tech.js', 'js/app.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
