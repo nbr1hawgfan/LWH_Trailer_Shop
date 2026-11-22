@@ -52,8 +52,9 @@ window.TSTech = (function () {
   function showTab(t) {
     screen('scrTech');
     document.querySelectorAll('#techTabs .tab').forEach(b => b.classList.toggle('active', b.dataset.ttab === t));
-    $('techJobs').hidden = t !== 'jobs'; $('techRecent').hidden = t !== 'recent';
+    $('techJobs').hidden = t !== 'jobs'; $('techRecent').hidden = t !== 'recent'; $('techStock').hidden = t !== 'stock';
     if (t === 'recent' && !st.recentLoaded) loadRecent();
+    if (t === 'stock') TSStock.open();
   }
   async function loadJobs() {
     if (!st.jobs.length) $('techJobs').innerHTML = '<div class="empty">Loading your jobs…</div>';
@@ -121,6 +122,7 @@ window.TSTech = (function () {
       </div></div>
       ${active ? `<div class="card"><div class="card-h">Labor notes</div><div class="card-b"><label class="lbl" for="laborNotes">Describe work performed</label><textarea id="laborNotes" placeholder="What was repaired, parts replaced, findings…"></textarea></div></div>
       <div class="card"><div class="card-h">Parts used</div><div class="card-b">
+        <p class="parts-note">Start typing and pick the part from the list: it comes off the shop's stock when you save. Not on the list? Just type it in.</p>
         <div class="parts-head"><span>Description</span><span>Qty</span><span>Notes / vendor</span><span></span></div>
         <div id="partsBody"></div><button type="button" class="add-dashed" id="addPart">+ Add part</button></div></div>` : ''}
       ${calls ? `<div class="card"><div class="card-h">Call a manager</div><div class="card-b">${calls}</div></div>` : ''}
@@ -131,7 +133,8 @@ window.TSTech = (function () {
       </div>`;
     document.querySelectorAll('#repairBody .check').forEach(b => b.onclick = () => { b.classList.toggle('done'); b.querySelector('.box').textContent = b.classList.contains('done') ? '✓' : ''; });
     if (active) {
-      addPart(); $('addPart').onclick = addPart;
+      $('addPart').onclick = () => addPart();
+      loadSessionParts();
       $('btnSave').onclick = () => stopRepair(false);
       $('btnDone').onclick = () => stopRepair(true);
       startClock();
@@ -140,16 +143,41 @@ window.TSTech = (function () {
       const b = $('btnStart'); if (b) b.onclick = startRepair;
     }
   }
-  function addPart() {
+  // Parts already saved on this repair (from shop stock) come back when the job is reopened.
+  async function loadSessionParts() {
+    const sess = st.session, body = $('partsBody');
+    body.innerHTML = '<p class="muted" style="margin:0 0 6px">Loading parts…</p>';
+    const [saved] = await Promise.all([TSStock.sessionParts(sess), TSStock.load()]);
+    if (st.session !== sess || !$('partsBody')) return;
+    body.innerHTML = '';
+    (saved && saved.length ? saved : [null]).forEach(p => addPart(p));
+  }
+  function addPart(p) {
     const row = document.createElement('div'); row.className = 'part-row';
-    row.innerHTML = '<input class="pd" placeholder="Description" autocomplete="off"><input class="pq" placeholder="1" autocomplete="off"><input class="pn" placeholder="Vendor / notes" autocomplete="off"><button type="button" class="part-del" aria-label="Remove part">✕</button>';
+    row.innerHTML = '<input class="pd" placeholder="Part (start typing to pick from stock)" autocomplete="off" list="stkParts"><input class="pq" placeholder="Qty 1" autocomplete="off" inputmode="decimal"><input class="pn" placeholder="Vendor / notes" autocomplete="off"><button type="button" class="part-del" aria-label="Remove part">✕</button><small class="pinfo"></small>';
+    const pd = row.querySelector('.pd'), info = row.querySelector('.pinfo');
+    const match = () => {
+      const sp = TSStock.find(pd.value);
+      row.dataset.part = sp ? sp.id : ''; row.classList.toggle('stocked', !!sp);
+      info.className = 'pinfo' + (sp && sp.low ? ' low' : '');
+      info.textContent = sp ? `From stock · ${TSStock.qty(sp.on_hand)} ${sp.uom || 'each'} on the shelf${sp.bin ? ' · bin ' + sp.bin : ''}${sp.low ? ' · running low' : ''}` : '';
+    };
+    pd.addEventListener('input', match);
+    if (p) {
+      const sp = p.part_id ? TSStock.byId(p.part_id) : null;
+      pd.value = sp ? sp._label : (p.desc || ''); row.querySelector('.pq').value = p.qty || ''; row.querySelector('.pn').value = p.notes || '';
+      match();
+      if (p.part_id && !sp) { row.dataset.part = p.part_id; row.classList.add('stocked'); }
+    }
     row.querySelector('.part-del').onclick = () => row.remove();
     $('partsBody').appendChild(row);
   }
   function collectParts() {
-    return [...document.querySelectorAll('#partsBody .part-row')].map(r => ({
-      desc: r.querySelector('.pd').value.trim(), qty: r.querySelector('.pq').value.trim(), notes: r.querySelector('.pn').value.trim()
-    })).filter(p => p.desc);
+    return [...document.querySelectorAll('#partsBody .part-row')].map(r => {
+      const part = { desc: r.querySelector('.pd').value.trim(), qty: r.querySelector('.pq').value.trim(), notes: r.querySelector('.pn').value.trim() };
+      if (r.dataset.part) { part.part_id = Number(r.dataset.part); if (!part.qty) part.qty = '1'; }
+      return part;
+    }).filter(p => p.desc);
   }
   async function startRepair() {
     const job = st.job;
@@ -179,8 +207,16 @@ window.TSTech = (function () {
       const [lat, lng] = await gps(); TS.busy(false);
       TS.busy(true, complete ? 'Submitting…' : 'Saving…');
       try {
-        const r = await tech('stopRepair', st.session.rowIndex, st.name, st.session.woNumber, lat || '', lng || '', parts, labor.trim(), complete, mins);
+        const sess = st.session;
+        const r = await tech('stopRepair', sess.rowIndex, st.name, sess.woNumber, lat || '', lng || '', parts, labor.trim(), complete, mins);
         if (!r || !r.success) throw new Error((r && r.message) || 'Save failed.');
+        // Shop stock: set this repair's parts (picking from stock deducts; taking one off puts it back)
+        const used = await TSStock.use(sess, st.name, parts);
+        let stockNote = '';
+        if (!used.ok) stockNote = ' Parts stock didn\'t update: tell a manager.';
+        else if (used.low && used.low.length) stockNote = ' Running low: ' + used.low.map(x => x.description + ' (' + TSStock.qty(x.on_hand) + ' left)').join(', ') + '.';
+        if (stockNote) setTimeout(() => toast(stockNote.trim(), used.ok ? '' : 'err'), 2600);
+        TSStock.load(true);
         if (complete) {
           stopClock();
           const wo = st.session.woNumber;

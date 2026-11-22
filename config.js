@@ -10,6 +10,11 @@ window.TS_CONFIG = {
     { name: 'Derek Dixon',   phone: '479-651-9227' }
   ],
 
+  // Shop parts stock (Supabase, same project as the Driver Toolkit and Transportation Manager).
+  // Parts a tech picks from stock come off the shelf count when the repair is saved.
+  SB_URL: 'https://tjivcqxnkftujceumdtx.supabase.co',
+  SB_KEY: 'sb_publishable_PYlWSW6-Gi-QZl91IXUq0Q_W5mO3sDT',
+
   // Weather on the start screen (Fort Smith, AR)
   WX_LAT: 35.3859,
   WX_LNG: -94.3985

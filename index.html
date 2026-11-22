@@ -51,10 +51,15 @@
       <div class="tabs" id="techTabs">
         <button class="tab active" data-ttab="jobs">My Jobs</button>
         <button class="tab" data-ttab="recent">Recent Work</button>
+        <button class="tab" data-ttab="stock">Parts Stock</button>
       </div>
       <div class="wrap">
         <div id="techJobs"></div>
         <div id="techRecent" hidden></div>
+        <div id="techStock" hidden>
+          <input type="search" id="stkSearch" class="stk-search" placeholder="Search parts: tire, gladhand, bulb…" autocomplete="off">
+          <div id="stkList"></div>
+        </div>
       </div>
     </section>
 
@@ -78,11 +83,13 @@
     <iframe id="docFrame" title="Work order"></iframe>
   </div>
 
+  <datalist id="stkParts"></datalist>
   <div class="toast" id="toast" hidden></div>
   <div class="busy" id="busy" hidden><div class="spinner"></div><div id="busyMsg">Loading…</div></div>
 
   <script src="config.js"></script>
   <script src="js/core.js"></script>
+  <script src="js/stock.js"></script>
   <script src="js/tech.js"></script>
   <script src="js/app.js"></script>
 <!-- LWH-USAGE-START: anonymous app-usage ping (see hub.logisticswarehouse.net/usage/) -->
